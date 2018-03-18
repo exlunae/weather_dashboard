@@ -1,4 +1,14 @@
 from flask import Flask, render_template, redirect, request
+import urllib2
+import json
+
+# Authenticated API
+def weather_forecast(city):
+    url = ('http://api.openweathermap.org/data/2.5/weather?q=%s&APPID=(01a74f4a3f45f9307836e7932ca11a42)' % (city))
+    res = urllib2.urlopen(url).read()
+    return json.loads(res)
+   
+#forecast = weather_forecast('San Jose')
 
 app = Flask(__name__)
 
@@ -15,8 +25,8 @@ def index():
 @app.route('/info', methods=['POST', 'GET'])
 def info():
     if request.method == 'POST':
-        info = request.form
-        return render_template('info.html', info=info)
+        city = request.form['city']
+        return render_template('info.html', city=city)
     elif request.method == 'GET':
         return render_template('index.html')
 
