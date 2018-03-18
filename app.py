@@ -2,7 +2,6 @@ from flask import Flask, render_template, redirect, request
 
 app = Flask(__name__)
 
-
 @app.route('/')
 def main():
     return redirect('/index')
@@ -15,9 +14,11 @@ def index():
 
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    # if request.method == 'POST':
-    info = request.form
-    return render_template('info.html', info=info)
+    if request.method == 'POST':
+        info = request.form
+        return render_template('info.html', info=info)
+    elif request.method == 'GET':
+        return render_template('index.html')
 
 
 @app.errorhandler(404)
@@ -27,7 +28,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html')  
-
 
 if __name__ == "__main__":
     app.run(debug=True)
