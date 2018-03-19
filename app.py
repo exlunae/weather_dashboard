@@ -1,6 +1,13 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, make_response
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import urllib2
 import json
+import pandas as pd
+
+import random
+import StringIO
 
 # Authenticated API
 def weather_forecast(city):
@@ -30,6 +37,21 @@ def info():
     elif request.method == 'GET':
         return render_template('index.html')
 
+@app.route('/plot.png')
+def plot():
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+
+    xs = range(100)
+    ys = [random.randint(1, 50) for x in xs]
+
+    axis.plot(xs, ys)
+    canvas = FigureCanvas(fig)
+    output = StringIO.StringIO()
+    canvas.print_png(output)
+    response = make_response(output.getvalue())
+    response.mimetype = 'image/png'
+    return response
 
 @app.errorhandler(404)
 def page_not_found(e):
