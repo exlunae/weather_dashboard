@@ -3,20 +3,28 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import urllib2
-import json
 import pandas as pd
+import json
+import urllib2
+from pandas.io.json import json_normalize 
 
 import random
 import StringIO
 
-# Authenticated API
 def weather_forecast(city):
-    url = ('http://api.openweathermap.org/data/2.5/weather?q=%s&APPID=(01a74f4a3f45f9307836e7932ca11a42)' % (city))
+    url = ('http://api.openweathermap.org/data/2.5/forecast?q=%s&units=imperial&APPID=01a74f4a3f45f9307836e7932ca11a42' % (city))
     res = urllib2.urlopen(url).read()
-    return json.loads(res)
-   
-#forecast = weather_forecast('San Jose')
+    weather_json = json.loads(res)
 
+    days_to_forecast = {}
+    day_counter = 1
+    for i in range(0, 40, 8):
+        temp = weather_json['list'][i]['main']['temp']
+        #weather = weather_json['list'][1]['weather'][0]['main']
+        days_to_forecast.update({day_counter: temp})
+        day_counter += 1
+    return days_to_forecast
+    
 app = Flask(__name__)
 
 @app.route('/')
@@ -37,15 +45,18 @@ def info():
     elif request.method == 'GET':
         return render_template('index.html')
 
-@app.route('/plot.png')
+@app.route('/plot.png', methods=['POST', 'GET'])
 def plot():
+    city = request.form['city']
     fig = Figure()
     axis = fig.add_subplot(1, 1, 1)
 
-    xs = range(100)
-    ys = [random.randint(1, 50) for x in xs]
+    temp_list = weather_forecast(city).values()
 
-    axis.plot(xs, ys)
+    axis.plot([1,2,3,4,5], temp_list, 'ro')
+    axis.axis([0.5, 5.5, 0, 110])
+
+
     canvas = FigureCanvas(fig)
     output = StringIO.StringIO()
     canvas.print_png(output)
